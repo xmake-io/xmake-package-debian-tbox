@@ -25,8 +25,6 @@ if(MSVC)
     target_compile_options(tbox PRIVATE $<$<COMPILE_LANGUAGE:C>:-TP>)
 endif()
 target_compile_options(tbox PRIVATE
-    $<$<COMPILE_LANGUAGE:C>:-m64>
-    $<$<COMPILE_LANGUAGE:CXX>:-m64>
     $<$<COMPILE_LANGUAGE:C>:-Wno-error=deprecated-declarations>
     $<$<COMPILE_LANGUAGE:CXX>:-Wno-error=deprecated-declarations>
     $<$<COMPILE_LANGUAGE:C>:-fno-strict-aliasing>
@@ -50,13 +48,9 @@ else()
 endif()
 target_link_libraries(tbox PRIVATE
     pthread
-    pthread
     dl
     m
     c
-)
-target_link_options(tbox PRIVATE
-    -m64
 )
 target_sources(tbox PRIVATE
     src/tbox/tbox.c
