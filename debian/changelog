@@ -1,0 +1,5 @@
+tbox (1.6.7-1) unstable; urgency=medium
+
+  * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+
+ -- zhao zhen <zhaozhen@uniontech.com>  Wed, 26 Jan 2022 21:58:58 +0800

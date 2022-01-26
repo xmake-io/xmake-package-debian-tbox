@@ -1,0 +1,25 @@
+Source: tbox
+Section: Development
+Priority: optional
+Maintainer: zhaozhen <zhaozhen@uniontech.com> ruki <waruqi@gmail.com>
+Build-Depends:  debhelper-compat (= 13),
+                build-essential,
+                cmake
+Standards-Version: 4.5.0
+Homepage: https://github.com/tboox/tbox
+#Vcs-Browser: https://salsa.debian.org/debian/tbox
+#Vcs-Git: https://salsa.debian.org/debian/tbox.git
+Rules-Requires-Root: no
+
+Package: libtbox
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: A glib-like multi-platform c library
+ TBOX is a glib-like cross-platform C library that is simple to use yet powerful in nature.
+ The project focuses on making C development easier and provides many modules (.e.g stream, coroutine, regex, container, algorithm ...), so that any developer can quickly pick it up and enjoy the productivity boost when developing in C language.
+ It supports the following platforms: Windows, Macosx, Linux, Android, iOS, *BSD and etc.
+ And it provides many compiling options using xmake:
+  Release: Disable debug information, assertion, memory checking and enable optimization.
+  Debug: Enable debug information, assertion, memory checking and disable optimization.
+  Small: Disable all extensional modules and enable space optimization.
+  Micro: compiling micro library (~64K) for the embed system.

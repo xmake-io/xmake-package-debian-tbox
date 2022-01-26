@@ -9,7 +9,6 @@ project(tbox VERSION 1.6.7 LANGUAGES C CXX ASM)
 # target
 add_library(tbox SHARED "")
 set_target_properties(tbox PROPERTIES OUTPUT_NAME "tbox")
-set_target_properties(tbox PROPERTIES LIBRARY_OUTPUT_DIRECTORY "build/linux/x86_64/release")
 target_include_directories(tbox PRIVATE
     src
 )
@@ -42,9 +41,6 @@ target_compile_options(tbox PRIVATE
 if(MSVC)
     target_compile_options(tbox PRIVATE -W3)
     target_compile_options(tbox PRIVATE -WX)
-else()
-    target_compile_options(tbox PRIVATE -Wall)
-    target_compile_options(tbox PRIVATE -Werror)
 endif()
 target_compile_features(tbox PRIVATE c_std_99)
 if(MSVC)
