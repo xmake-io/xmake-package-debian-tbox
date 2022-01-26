@@ -1,0 +1,30 @@
+From 8c9d66282aac94a3b6a0f8a8c9f933b9fefec70a Mon Sep 17 00:00:00 2001
+From: ruki <waruqi@gmail.com>
+Date: Fri, 28 Jan 2022 00:18:56 +0800
+Subject: [PATCH 2/4] add ppc
+
+---
+ src/tbox/prefix/arch.h | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/src/tbox/prefix/arch.h b/src/tbox/prefix/arch.h
+index a421972c..00e9be8f 100644
+--- a/src/tbox/prefix/arch.h
++++ b/src/tbox/prefix/arch.h
+@@ -194,6 +194,13 @@
+ #   else
+ #       error unknown version of RiscV, please feedback to us.
+ #   endif
++#elif defined(__PPC__) || defined(_ARCH_PPC)
++#   define TB_ARCH_PPC
++#   if (defined(__PPC64__) && __PPC64__ == 1) || defined(_ARCH_PPC64)
++#       define TB_ARCH_STRING               "ppc64"
++#   else
++#       define TB_ARCH_STRING               "ppc"
++#   endif
+ #elif defined(TB_COMPILER_IS_TINYC)
+ #   if defined(TCC_TARGET_I386)
+ #       define TB_ARCH_x86
+-- 
+2.35.1
+

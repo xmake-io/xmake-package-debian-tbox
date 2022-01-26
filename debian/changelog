@@ -1,3 +1,10 @@
+tbox (1.6.7-2) unstable; urgency=medium
+
+  * Try fixing FTBFS for some archs
+  * Fix missing cmake source files
+
+ -- Yangfl <mmyangfl@gmail.com>  Mon, 14 Mar 2022 10:29:30 +0800
+
 tbox (1.6.7-1) unstable; urgency=medium
 
   * Initial release

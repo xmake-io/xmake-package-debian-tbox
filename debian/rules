@@ -7,9 +7,14 @@ export DEB_BUILD_MAINT_OPTIONS = hardening=+all
 export DEB_CFLAGS_MAINT_APPEND = -Wall
 export DEB_LDFLAGS_MAINT_APPEND =
 
+include /usr/share/dpkg/architecture.mk
+
 
 %:
 	dh $@
 
-execute_before_dh_auto_configure:
+execute_before_dh_auto_configure-arch:
 	ln -sf debian/CMakeLists.txt
+
+override_dh_auto_configure-arch:
+	dh_auto_configure -a -- -DTB_ARCH_STRING=$(DEB_HOST_GNU_CPU)

@@ -1,0 +1,38 @@
+From 4221d43e4106ced0f9c6e701419834adad433b42 Mon Sep 17 00:00:00 2001
+From: ruki <waruqi@gmail.com>
+Date: Fri, 28 Jan 2022 00:29:54 +0800
+Subject: [PATCH 3/4] add s390
+
+---
+ src/tbox/prefix/arch.h | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
+
+diff --git a/src/tbox/prefix/arch.h b/src/tbox/prefix/arch.h
+index 00e9be8f..6c8847c1 100644
+--- a/src/tbox/prefix/arch.h
++++ b/src/tbox/prefix/arch.h
+@@ -189,10 +189,8 @@
+ #   define TB_ARCH_RISCV
+ #   if defined(__riscv_xlen) && __riscv_xlen == 64
+ #       define TB_ARCH_STRING               "riscv64"
+-#   elif defined(__loongarch32)
+-#       define TB_ARCH_STRING               "riscv32"
+ #   else
+-#       error unknown version of RiscV, please feedback to us.
++#       define TB_ARCH_STRING               "riscv32"
+ #   endif
+ #elif defined(__PPC__) || defined(_ARCH_PPC)
+ #   define TB_ARCH_PPC
+@@ -201,6 +199,9 @@
+ #   else
+ #       define TB_ARCH_STRING               "ppc"
+ #   endif
++#elif defined(__s390__)
++#   define TB_ARCH_s390
++#   define TB_ARCH_STRING                   "s390"
+ #elif defined(TB_COMPILER_IS_TINYC)
+ #   if defined(TCC_TARGET_I386)
+ #       define TB_ARCH_x86
+-- 
+2.35.1
+
