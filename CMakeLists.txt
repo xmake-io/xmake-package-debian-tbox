@@ -11,9 +11,7 @@ add_library(tbox SHARED "")
 set_target_properties(tbox PROPERTIES OUTPUT_NAME "tbox")
 target_include_directories(tbox PRIVATE
     src
-)
-target_include_directories(tbox INTERFACE
-    src
+    debian
 )
 target_compile_definitions(tbox PRIVATE
     __tb_small__
@@ -683,6 +681,6 @@ target_sources(tbox PRIVATE
     src/tbox/utils/impl/bits_x86.h
     src/tbox/utils/impl/impl.h
     src/tbox/utils/impl/prefix.h
-    src/tbox.config.h
+    debian/tbox.config.h
 )
 
