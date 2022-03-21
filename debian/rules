@@ -12,6 +12,9 @@ export DEB_LDFLAGS_MAINT_APPEND = -Wl,--as-needed
 execute_before_dh_auto_configure:
 	ln -sf debian/CMakeLists.txt
 
+execute_after_dh_clean:
+	@[ -f CMakeLists.txt ] && rm CMakeLists.txt || true
+
 override_dh_auto_configure:
 	dh_auto_configure -- -DCMAKE_LIBRARY_PATH=$(DEB_HOST_MULTIARCH)
 
