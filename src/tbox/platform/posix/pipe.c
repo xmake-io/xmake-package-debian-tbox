@@ -84,7 +84,6 @@ tb_pipe_file_ref_t tb_pipe_file_init(tb_char_t const* name, tb_size_t mode, tb_s
 {
     // check
     tb_assert_and_check_return_val(name, tb_null);
-    tb_assert_and_check_return_val(mode == TB_FILE_MODE_WO || mode == TB_FILE_MODE_RO, tb_null);
 
     tb_bool_t ok = tb_false;
     tb_int_t  fd = -1;
@@ -105,16 +104,17 @@ tb_pipe_file_ref_t tb_pipe_file_init(tb_char_t const* name, tb_size_t mode, tb_s
 
         // init flags
         tb_size_t flags = 0;
-        if (mode == TB_FILE_MODE_RO) flags |= O_NONBLOCK | O_RDONLY;
-        else if (mode == TB_FILE_MODE_WO) flags |= O_WRONLY;
+        if (mode & TB_PIPE_MODE_RO) flags |= O_RDONLY;
+        else if (mode & TB_PIPE_MODE_WO) flags |= O_WRONLY;
         tb_assert_and_check_break(flags);
 
         // open pipe file
         fd = open(pipename, flags);
         tb_assert_and_check_break(fd >= 0);
 
-        // non-block
-        fcntl(fd, F_SETFL, fcntl(fd, F_GETFL) | O_NONBLOCK);
+        // set block mode
+        if (mode & TB_PIPE_MODE_BLOCK) fcntl(fd, F_SETFL, fcntl(fd, F_GETFL) & ~O_NONBLOCK);
+        else fcntl(fd, F_SETFL, fcntl(fd, F_GETFL) | O_NONBLOCK);
 
         // ok
         ok = tb_true;
@@ -131,7 +131,7 @@ tb_pipe_file_ref_t tb_pipe_file_init(tb_char_t const* name, tb_size_t mode, tb_s
 #endif
 
 #if defined(TB_CONFIG_POSIX_HAVE_PIPE) || defined(TB_CONFIG_POSIX_HAVE_PIPE2)
-tb_bool_t tb_pipe_file_init_pair(tb_pipe_file_ref_t pair[2], tb_size_t buffer_size)
+tb_bool_t tb_pipe_file_init_pair(tb_pipe_file_ref_t pair[2], tb_size_t mode[2], tb_size_t buffer_size)
 {
     // check
     tb_assert_and_check_return_val(pair, tb_false);
@@ -145,11 +145,16 @@ tb_bool_t tb_pipe_file_init_pair(tb_pipe_file_ref_t pair[2], tb_size_t buffer_si
         if (pipe2(pipefd, O_NONBLOCK) == -1) break;
 #else
         if (pipe(pipefd) == -1) break;
-
-        // non-block
-        fcntl(pipefd[0], F_SETFL, fcntl(pipefd[0], F_GETFL) | O_NONBLOCK);
-        fcntl(pipefd[1], F_SETFL, fcntl(pipefd[1], F_GETFL) | O_NONBLOCK);
 #endif
+
+        // set block mode (default: non-block mode)
+        tb_size_t mode0 = mode? mode[0] : 0;
+        tb_size_t mode1 = mode? mode[1] : 0;
+        if (mode0 & TB_PIPE_MODE_BLOCK) fcntl(pipefd[0], F_SETFL, fcntl(pipefd[0], F_GETFL) & ~O_NONBLOCK);
+        else fcntl(pipefd[0], F_SETFL, fcntl(pipefd[0], F_GETFL) | O_NONBLOCK);
+
+        if (mode1 & TB_PIPE_MODE_BLOCK) fcntl(pipefd[1], F_SETFL, fcntl(pipefd[1], F_GETFL) & ~O_NONBLOCK);
+        else fcntl(pipefd[1], F_SETFL, fcntl(pipefd[1], F_GETFL) | O_NONBLOCK);
 
         // save to file pair
         pair[0] = tb_fd2pipefile(pipefd[0]);
@@ -162,7 +167,7 @@ tb_bool_t tb_pipe_file_init_pair(tb_pipe_file_ref_t pair[2], tb_size_t buffer_si
     return ok;
 }
 #else
-tb_bool_t tb_pipe_file_init_pair(tb_pipe_file_ref_t pair[2], tb_size_t buffer_size)
+tb_bool_t tb_pipe_file_init_pair(tb_pipe_file_ref_t pair[2], tb_size_t mode[2], tb_size_t buffer_size)
 {
     tb_trace_noimpl();
     return tb_false;

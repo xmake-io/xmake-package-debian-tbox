@@ -61,15 +61,16 @@
 #       define TB_ARCH_STRING               "x86"
 #   endif
 #elif defined(__x86_64) \
-    || defined(__amd64__) \
-    || defined(__amd64) \
-    || defined(_M_IA64) \
+    || defined(__amd64__) || defined(__amd64) \
+    || defined(__ia64__) || defined(__IA64__) || defined(__ia64) || defined(_M_IA64) \
     || defined(_M_X64)
 #   define TB_ARCH_x64
 #   if defined(__x86_64)
 #       define  TB_ARCH_STRING              "x86_64"
 #   elif defined(__amd64__) || defined(__amd64)
 #       define  TB_ARCH_STRING              "amd64"
+#   elif defined(__ia64__) || defined(__IA64__) || defined(__ia64) || defined(_M_IA64)
+#       define  TB_ARCH_STRING              "ia64"
 #   else
 #       define TB_ARCH_STRING               "x64"
 #   endif
@@ -177,13 +178,59 @@
 #       endif
 #   endif
 #elif defined(__loongarch__)
-#   define TB_ARCH_LOONGARCH 
+#   define TB_ARCH_LOONGARCH
 #   if defined(__loongarch64)
 #       define TB_ARCH_STRING               "loongarch64"
 #   elif defined(__loongarch32)
 #       define TB_ARCH_STRING               "loongarch32"
 #   else
 #       error unknown version of LoongArch, please feedback to us.
+#   endif
+#elif defined(__riscv)
+#   define TB_ARCH_RISCV
+#   if defined(__riscv_xlen) && __riscv_xlen == 64
+#       define TB_ARCH_STRING               "riscv64"
+#   else
+#       define TB_ARCH_STRING               "riscv32"
+#   endif
+#elif defined(__hppa__) || defined(__HPPA__) || defined(__hppa)
+#   define TB_ARCH_HPPA
+#   define TB_ARCH_STRING                   "hppa"
+#elif defined(__m68k__) || defined(__MC68K__) || defined(M68000)
+#   define TB_ARCH_M68K
+#   define TB_ARCH_STRING                   "m68k"
+#elif defined(__PPC__) || defined(_ARCH_PPC)
+#   define TB_ARCH_PPC
+#   if (defined(__PPC64__) && __PPC64__ == 1) || defined(_ARCH_PPC64)
+#       define TB_ARCH_STRING               "ppc64"
+#   else
+#       define TB_ARCH_STRING               "ppc"
+#   endif
+#elif defined(__s390__)
+#   define TB_ARCH_s390
+#   define TB_ARCH_STRING                   "s390"
+#elif defined(__alpha__)
+#   define TB_ARCH_ALPHA
+#   define TB_ARCH_STRING                   "alpha"
+#elif defined(__sparc__) || defined(__sparc)
+#   define TB_ARCH_SPARC
+#   define TB_ARCH_STRING                   "sparc"
+#elif defined(__sh__)
+#   define TB_ARCH_SH
+#   if defined(__SH4__)
+#       define TB_ARCH_SH4
+#       define TB_ARCH_STRING               "SH4"
+#   elif defined(__SH3__)
+#       define TB_ARCH_SH4
+#       define TB_ARCH_STRING               "SH3"
+#   elif defined(__SH2__)
+#       define TB_ARCH_SH4
+#       define TB_ARCH_STRING               "SH2"
+#   elif defined(__SH1__)
+#       define TB_ARCH_SH1
+#       define TB_ARCH_STRING               "SH1"
+#   else
+#       define TB_ARCH_STRING               "SH"
 #   endif
 #elif defined(TB_COMPILER_IS_TINYC)
 #   if defined(TCC_TARGET_I386)
@@ -199,9 +246,6 @@
 #       error unknown arch for tiny c, please define target like -DTCC_TARGET_I386
 #   endif
 #else
-//#     define TB_ARCH_SPARC
-//#     define TB_ARCH_PPC
-//#     define TB_ARCH_SH4
 #   error unknown arch
 #   define TB_ARCH_STRING                   "unknown_arch"
 #endif

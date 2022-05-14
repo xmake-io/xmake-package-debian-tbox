@@ -2,6 +2,18 @@
 
 ## master (unreleased)
 
+## v1.6.8
+
+### Changes
+
+* Add riscv32/riscv64/sh4/sparc support
+* Improve path support
+* Add peer name for socket
+
+### Bugs Fixed
+
+* [#178](https://github.com/tboox/tbox/issues/178): Fix coroutine on windows/x86
+
 ## v1.6.7
 
 ### Changes
@@ -221,6 +233,18 @@
 # 更新日志
 
 ## master (开发中)
+
+## v1.6.8
+
+### 改进
+
+* 添加 riscv32/riscv64/sh4/sparc 架构支持
+* 改进路径支持
+* 为 socket 添加 peer name 接口
+
+### Bugs 修复
+
+* [#178](https://github.com/tboox/tbox/issues/178): 修复协程在 windows/x86 上栈溢出问题
 
 ## v1.6.7
 
