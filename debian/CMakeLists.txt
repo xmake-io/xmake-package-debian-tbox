@@ -58,7 +58,6 @@ add_library(tbox STATIC
     src/tbox/libc/string/strirchr.c
     src/tbox/libc/string/strirstr.c
     src/tbox/libc/string/stristr.c
-    src/tbox/libc/string/strlcpy.c
     src/tbox/libc/string/strlen.c
     src/tbox/libc/string/strncat.c
     src/tbox/libc/string/strnchr.c
@@ -102,6 +101,7 @@ add_library(tbox STATIC
     src/tbox/libc/string/wcsrchr.c
     src/tbox/libc/string/wcsrstr.c
     src/tbox/libc/string/wcsstr.c
+    src/tbox/libc/string/strlcpy.c
     src/tbox/utils/base32.c
     src/tbox/utils/base64.c
     src/tbox/utils/bits.c
@@ -118,6 +118,7 @@ add_library(tbox STATIC
     src/tbox/memory/fixed_pool.c
     src/tbox/memory/impl/memory.c
     src/tbox/memory/impl/native_large_allocator.c
+    src/tbox/memory/impl/prefix.c
     src/tbox/memory/impl/static_fixed_pool.c
     src/tbox/memory/impl/static_large_allocator.c
     src/tbox/memory/large_allocator.c
@@ -221,12 +222,10 @@ add_library(tbox STATIC
     src/tbox/platform/file.c
     src/tbox/platform/filelock.c
     src/tbox/platform/hostname.c
-    src/tbox/platform/ifaddrs.c
     src/tbox/platform/ltimer.c
     src/tbox/platform/mutex.c
     src/tbox/platform/native_memory.c
     src/tbox/platform/page.c
-    src/tbox/platform/path.c
     src/tbox/platform/pipe.c
     src/tbox/platform/poller.c
     src/tbox/platform/print.c
@@ -234,7 +233,6 @@ add_library(tbox STATIC
     src/tbox/platform/sched.c
     src/tbox/platform/semaphore.c
     src/tbox/platform/socket.c
-    src/tbox/platform/stdfile.c
     src/tbox/platform/syserror.c
     src/tbox/platform/thread.c
     src/tbox/platform/thread_local.c
@@ -242,6 +240,9 @@ add_library(tbox STATIC
     src/tbox/platform/time.c
     src/tbox/platform/timer.c
     src/tbox/platform/virtual_memory.c
+    src/tbox/platform/ifaddrs.c
+    src/tbox/platform/path.c
+    src/tbox/platform/stdfile.c
     src/tbox/platform/impl/dns.c
     src/tbox/platform/impl/platform.c
     src/tbox/platform/impl/pollerdata.c
@@ -298,6 +299,7 @@ add_library(tbox STATIC
     src/tbox/hash/sdbm.c
     src/tbox/hash/sha.c
     src/tbox/hash/uuid.c
+    src/tbox/platform/context.c
     src/tbox/coroutine/channel.c
     src/tbox/coroutine/coroutine.c
     src/tbox/coroutine/impl/coroutine.c
@@ -309,6 +311,7 @@ add_library(tbox STATIC
     src/tbox/coroutine/semaphore.c
     src/tbox/coroutine/stackless/coroutine.c
     src/tbox/coroutine/stackless/scheduler.c
+    src/tbox/platform/exception.c
     src/tbox/object/array.c
     src/tbox/object/boolean.c
     src/tbox/object/data.c
@@ -548,12 +551,10 @@ add_library(tbox STATIC
     src/tbox/platform/deprecated/atomic64.h
     src/tbox/platform/deprecated/deprecated.h
     src/tbox/platform/deprecated/prefix.h
-    src/tbox/platform/directory.h
     src/tbox/platform/dynamic.h
     src/tbox/platform/environment.h
     src/tbox/platform/event.h
     src/tbox/platform/exception.h
-    src/tbox/platform/file.h
     src/tbox/platform/filelock.h
     src/tbox/platform/hostname.h
     src/tbox/platform/ifaddrs.h
@@ -569,8 +570,6 @@ add_library(tbox STATIC
     src/tbox/platform/mutex.h
     src/tbox/platform/native_memory.h
     src/tbox/platform/page.h
-    src/tbox/platform/path.h
-    src/tbox/platform/pipe.h
     src/tbox/platform/platform.h
     src/tbox/platform/poller.h
     src/tbox/platform/posix/prefix.h
@@ -580,9 +579,7 @@ add_library(tbox STATIC
     src/tbox/platform/process.h
     src/tbox/platform/sched.h
     src/tbox/platform/semaphore.h
-    src/tbox/platform/socket.h
     src/tbox/platform/spinlock.h
-    src/tbox/platform/stdfile.h
     src/tbox/platform/syserror.h
     src/tbox/platform/systemv/prefix.h
     src/tbox/platform/thread.h
@@ -612,16 +609,20 @@ add_library(tbox STATIC
     src/tbox/platform/windows/prefix.h
     src/tbox/platform/windows/socket_pool.h
     src/tbox/platform/windows/windows.h
+    src/tbox/platform/path.h
+    src/tbox/platform/pipe.h
+    src/tbox/platform/socket.h
+    src/tbox/platform/stdfile.h
+    src/tbox/platform/directory.h
+    src/tbox/platform/file.h
     src/tbox/prefix.h
     src/tbox/prefix/abort.h
-    src/tbox/prefix/arch.h
     src/tbox/prefix/assembler.h
     src/tbox/prefix/assert.h
     src/tbox/prefix/cache.h
     src/tbox/prefix/check.h
     src/tbox/prefix/compiler.h
     src/tbox/prefix/config.h
-    src/tbox/prefix/cpu.h
     src/tbox/prefix/endian.h
     src/tbox/prefix/keyword.h
     src/tbox/prefix/limits.h
@@ -633,6 +634,8 @@ add_library(tbox STATIC
     src/tbox/prefix/type.h
     src/tbox/prefix/utils.h
     src/tbox/prefix/version.h
+    src/tbox/prefix/arch.h
+    src/tbox/prefix/cpu.h
     src/tbox/regex/prefix.h
     src/tbox/regex/regex.h
     src/tbox/stream/filter.h
