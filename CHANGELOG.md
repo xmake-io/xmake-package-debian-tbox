@@ -2,6 +2,17 @@
 
 ## master (unreleased)
 
+## v1.6.9
+
+### Changes
+
+* Improve bloom filter
+* Improve random for msvc
+
+### Bugs Fixed
+
+* [#187](https://github.com/tboox/tbox/issues/187): Fix sort and iterator bug
+
 ## v1.6.8
 
 ### Changes
@@ -233,6 +244,17 @@
 # 更新日志
 
 ## master (开发中)
+
+## v1.6.9
+
+### 改进
+
+* 改进 bloom filter
+* 改进 windows/msvc 下 random 实现
+
+### Bugs 修复
+
+* [#187](https://github.com/tboox/tbox/issues/187): 修复排序和迭代器问题
 
 ## v1.6.8
 
