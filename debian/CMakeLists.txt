@@ -4,10 +4,9 @@
 
 # project
 cmake_minimum_required(VERSION 3.13.0)
-project(tbox VERSION 1.6.6)
+project(tbox VERSION 1.6.9 LANGUAGES C CXX ASM)
 
 # target
-enable_language(ASM)
 add_library(tbox STATIC
     src/tbox/hash/arch/crc32.S
     src/tbox/platform/arch/context.S
