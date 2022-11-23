@@ -118,7 +118,7 @@ tb_bool_t tb_file_info(tb_char_t const* path, tb_file_info_t* info)
     tb_trace_noimpl();
     return tb_false;
 }
-tb_bool_t tb_file_copy(tb_char_t const* path, tb_char_t const* dest)
+tb_bool_t tb_file_copy(tb_char_t const* path, tb_char_t const* dest, tb_size_t flags)
 {
     tb_trace_noimpl();
     return tb_false;
@@ -144,6 +144,11 @@ tb_bool_t tb_file_link(tb_char_t const* path, tb_char_t const* dest)
     return tb_false;
 }
 tb_bool_t tb_file_access(tb_char_t const* path, tb_size_t mode)
+{
+    tb_trace_noimpl();
+    return tb_false;
+}
+tb_bool_t tb_file_touch(tb_char_t const* path, tb_time_t atime, tb_time_t mtime)
 {
     tb_trace_noimpl();
     return tb_false;

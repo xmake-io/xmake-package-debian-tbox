@@ -15,60 +15,65 @@
  * Copyright (C) 2009-present, TBOOX Open Source Group.
  *
  * @author      ruki
- * @file        directory.c
+ * @file        fwatcher.c
  * @ingroup     platform
  */
 
 /* //////////////////////////////////////////////////////////////////////////////////////
+ * trace
+ */
+#define TB_TRACE_MODULE_NAME                "fwatcher"
+#define TB_TRACE_MODULE_DEBUG               (1)
+
+/* //////////////////////////////////////////////////////////////////////////////////////
  * includes
  */
-#include "directory.h"
+#include "fwatcher.h"
 
 /* //////////////////////////////////////////////////////////////////////////////////////
  * implementation
  */
-#if defined(TB_CONFIG_OS_WINDOWS) && !defined(TB_COMPILER_LIKE_UNIX)
-#   include "windows/directory.c"
-#elif defined(TB_CONFIG_POSIX_HAVE_OPENDIR)
-#   include "posix/directory.c"
+#if defined(TB_CONFIG_OS_WINDOWS)
+#   include "windows/fwatcher_iocp.c"
+#elif defined(TB_CONFIG_LINUX_HAVE_INOTIFY_INIT)
+#   include "linux/fwatcher_inotify.c"
+#elif defined(TB_CONFIG_OS_MACOSX)
+#   include "mach/fwatcher_fsevent.c"
+#elif defined(TB_CONFIG_OS_BSD)
+#   include "bsd/fwatcher_kqueue.c"
 #else
-tb_bool_t tb_directory_create(tb_char_t const* path)
+tb_fwatcher_ref_t tb_fwatcher_init()
+{
+    tb_trace_noimpl();
+    return tb_null;
+}
+
+tb_void_t tb_fwatcher_exit(tb_fwatcher_ref_t self)
+{
+    tb_trace_noimpl();
+}
+
+tb_bool_t tb_fwatcher_add(tb_fwatcher_ref_t self, tb_char_t const* watchdir, tb_bool_t recursion)
 {
     tb_trace_noimpl();
     return tb_false;
 }
-tb_bool_t tb_directory_remove(tb_char_t const* path)
+
+tb_bool_t tb_fwatcher_remove(tb_fwatcher_ref_t self, tb_char_t const* watchdir)
 {
     tb_trace_noimpl();
     return tb_false;
 }
-tb_size_t tb_directory_home(tb_char_t* path, tb_size_t maxn)
-{
-    tb_trace_noimpl();
-    return 0;
-}
-tb_size_t tb_directory_current(tb_char_t* path, tb_size_t maxn)
-{
-    tb_trace_noimpl();
-    return 0;
-}
-tb_bool_t tb_directory_current_set(tb_char_t const* path)
-{
-    tb_trace_noimpl();
-    return tb_false;
-}
-tb_size_t tb_directory_temporary(tb_char_t* path, tb_size_t maxn)
-{
-    tb_trace_noimpl();
-    return 0;
-}
-tb_void_t tb_directory_walk(tb_char_t const* path, tb_long_t recursion, tb_bool_t prefix, tb_directory_walk_func_t func, tb_cpointer_t priv)
+
+tb_void_t tb_fwatcher_spak(tb_fwatcher_ref_t self)
 {
     tb_trace_noimpl();
 }
-tb_bool_t tb_directory_copy(tb_char_t const* path, tb_char_t const* dest, tb_size_t flags)
+
+tb_long_t tb_fwatcher_wait(tb_fwatcher_ref_t self, tb_fwatcher_event_t* event, tb_long_t timeout)
 {
     tb_trace_noimpl();
-    return tb_false;
+    return -1;
 }
+
 #endif

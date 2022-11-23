@@ -86,9 +86,11 @@ tb_file_ref_t tb_file_init(tb_char_t const* path, tb_size_t mode)
     {
 #ifndef TB_CONFIG_MICRO_ENABLE
         // open it again after creating the file directory
+        tb_int_t errno_bak = errno;
         tb_char_t dir[TB_PATH_MAXN];
         if (tb_directory_create(tb_path_directory(path, dir, sizeof(dir))))
             fd = open(path, flags, modes);
+        else errno = errno_bak;
 #endif
     }
     tb_check_return_val(fd >= 0, tb_null);
@@ -188,27 +190,42 @@ tb_bool_t tb_file_info(tb_char_t const* path, tb_file_info_t* info)
     path = tb_path_absolute(path, full, TB_PATH_MAXN);
     tb_assert_and_check_return_val(path, tb_false);
 
-    // exists?
-    tb_check_return_val(!access(path, F_OK), tb_false);
-
     // get info
     if (info)
     {
         // init info
         tb_memset(info, 0, sizeof(tb_file_info_t));
 
-        // get stat
-#ifdef TB_CONFIG_POSIX_HAVE_STAT64
+        // get stat, even if the file does not exist, it may be a dead symbolic link
+#if defined(TB_CONFIG_POSIX_HAVE_LSTAT64)
         struct stat64 st = {0};
-        if (!stat64(path, &st))
+        if (!lstat64(path, &st))
 #else
         struct stat st = {0};
-        if (!stat(path, &st))
+        if (!lstat(path, &st))
 #endif
         {
-            // file type
+            // get file type
             if (S_ISDIR(st.st_mode)) info->type = TB_FILE_TYPE_DIRECTORY;
             else info->type = TB_FILE_TYPE_FILE;
+
+            // is symlink?
+            info->flags = TB_FILE_FLAG_NONE;
+            if (S_ISLNK(st.st_mode))
+            {
+                // we need get more file info about symlink, does it point to directory?
+                tb_memset(&st, 0, sizeof(st));
+#if defined(TB_CONFIG_POSIX_HAVE_STAT64)
+                if (!stat64(path, &st))
+#else
+                if (!stat(path, &st))
+#endif
+                {
+                    if (S_ISDIR(st.st_mode)) info->type = TB_FILE_TYPE_DIRECTORY;
+                    else info->type = TB_FILE_TYPE_FILE;
+                }
+                info->flags |= TB_FILE_FLAG_LINK;
+            }
 
             // file size
             info->size = st.st_size >= 0? (tb_hize_t)st.st_size : 0;
@@ -218,11 +235,14 @@ tb_bool_t tb_file_info(tb_char_t const* path, tb_file_info_t* info)
 
             // the last modify time
             info->mtime = (tb_time_t)st.st_mtime;
+            return tb_true;
         }
     }
-
-    // ok
-    return tb_true;
+    else if (!access(path, F_OK))
+    {
+        return tb_true;
+    }
+    return tb_false;
 }
 #ifndef TB_CONFIG_MICRO_ENABLE
 tb_long_t tb_file_pread(tb_file_ref_t file, tb_byte_t* data, tb_size_t size, tb_hize_t offset)
@@ -383,17 +403,54 @@ tb_long_t tb_file_pwritv(tb_file_ref_t file, tb_iovec_t const* list, tb_size_t s
     return real;
 #endif
 }
-tb_bool_t tb_file_copy(tb_char_t const* path, tb_char_t const* dest)
+tb_bool_t tb_file_copy(tb_char_t const* path, tb_char_t const* dest, tb_size_t flags)
 {
     // check
     tb_assert_and_check_return_val(path && dest, tb_false);
 
-#ifdef TB_CONFIG_POSIX_HAVE_COPYFILE
-
     // the full path
-    tb_char_t full0[TB_PATH_MAXN];
-    path = tb_path_absolute(path, full0, TB_PATH_MAXN);
+    tb_char_t data[TB_PATH_MAXN];
+    path = tb_path_absolute(path, data, TB_PATH_MAXN);
     tb_assert_and_check_return_val(path, tb_false);
+
+    // copy link
+    tb_file_info_t info = {0};
+    if (flags & TB_FILE_COPY_LINK && tb_file_info(path, &info) && info.flags & TB_FILE_FLAG_LINK)
+    {
+        // read link first
+        tb_char_t srcpath[TB_PATH_MAXN];
+        tb_long_t size = readlink(path, srcpath, TB_PATH_MAXN);
+        tb_char_t const* linkpath = srcpath;
+        if (size == TB_PATH_MAXN)
+        {
+            tb_size_t  maxn = TB_PATH_MAXN * 2;
+            tb_char_t* buff = (tb_char_t*)tb_malloc(maxn);
+            if (buff)
+            {
+                tb_long_t size = readlink(path, buff, maxn);
+                if (size > 0 && size < maxn)
+                {
+                    buff[size] = '\0';
+                    linkpath = buff;
+                }
+            }
+        }
+        else if (size >= 0 && size < TB_PATH_MAXN)
+            srcpath[size] = '\0';
+
+        // do link
+        tb_bool_t ok = tb_file_link(linkpath, dest);
+
+        // free link path
+        if (linkpath && linkpath != srcpath)
+        {
+            tb_free((tb_pointer_t)linkpath);
+            linkpath = tb_null;
+        }
+        return ok;
+    }
+
+#ifdef TB_CONFIG_POSIX_HAVE_COPYFILE
 
     // the dest path
     tb_char_t full1[TB_PATH_MAXN];
@@ -406,8 +463,10 @@ tb_bool_t tb_file_copy(tb_char_t const* path, tb_char_t const* dest)
     {
         // attempt to copy it again after creating directory
         tb_char_t dir[TB_PATH_MAXN];
+        tb_int_t errno_bak = errno;
         if (tb_directory_create(tb_path_directory(dest, dir, sizeof(dir))))
             return !copyfile(path, dest, 0, COPYFILE_ALL);
+        else errno = errno_bak;
     }
 
     // failed
@@ -418,11 +477,6 @@ tb_bool_t tb_file_copy(tb_char_t const* path, tb_char_t const* dest)
     tb_bool_t   ok = tb_false;
     do
     {
-        // get the absolute source path
-        tb_char_t data[8192];
-        path = tb_path_absolute(path, data, sizeof(data));
-        tb_assert_and_check_break(path);
-
         // get stat.st_mode first
 #ifdef TB_CONFIG_POSIX_HAVE_STAT64
         struct stat64 st = {0};
@@ -445,9 +499,11 @@ tb_bool_t tb_file_copy(tb_char_t const* path, tb_char_t const* dest)
         if (ofd < 0 && (errno != EPERM && errno != EACCES))
         {
             // attempt to open it again after creating directory
+            tb_int_t errno_bak = errno;
             tb_char_t dir[TB_PATH_MAXN];
             if (tb_directory_create(tb_path_directory(dest, dir, sizeof(dir))))
                 ofd = open(dest, O_RDWR | O_CREAT | O_TRUNC, st.st_mode & (S_IRWXU | S_IRWXG | S_IRWXO));
+            else errno = errno_bak;
         }
         tb_check_break(ofd >= 0);
 
@@ -560,9 +616,11 @@ tb_bool_t tb_file_rename(tb_char_t const* path, tb_char_t const* dest)
     else if (errno != EPERM && errno != EACCES)
     {
         // attempt to rename it again after creating directory
+        tb_int_t errno_bak = errno;
         tb_char_t dir[TB_PATH_MAXN];
         if (tb_directory_create(tb_path_directory(dest, dir, sizeof(dir))))
             return !rename(path, dest);
+        else errno = errno_bak;
     }
     return tb_false;
 }
@@ -582,9 +640,11 @@ tb_bool_t tb_file_link(tb_char_t const* path, tb_char_t const* dest)
     else if (errno != EPERM && errno != EACCES)
     {
         // attempt to link it again after creating directory
+        tb_int_t errno_bak = errno;
         tb_char_t dir[TB_PATH_MAXN];
         if (tb_directory_create(tb_path_directory(dest, dir, sizeof(dir))))
             return !symlink(path, dest);
+        else errno = errno_bak;
     }
     return tb_false;
 }
@@ -610,4 +670,56 @@ tb_bool_t tb_file_access(tb_char_t const* path, tb_size_t mode)
 
     return !access(full, flags);
 }
+tb_bool_t tb_file_touch(tb_char_t const* path, tb_time_t atime, tb_time_t mtime)
+{
+    // check
+    tb_assert_and_check_return_val(path, tb_false);
+
+    // the full path
+    tb_char_t full[TB_PATH_MAXN];
+    path = tb_path_absolute(path, full, TB_PATH_MAXN);
+    tb_assert_and_check_return_val(path, tb_false);
+
+    // file exists?
+    tb_bool_t ok = tb_false;
+    struct timespec ts[2];
+    tb_memset(ts, 0, sizeof(ts));
+    if (!access(path, F_OK))
+    {
+        if (atime > 0 || mtime > 0)
+        {
+#ifdef TB_CONFIG_POSIX_HAVE_UTIMENSAT
+            if (atime > 0) ts[0].tv_sec = atime;
+            else ts[0].tv_nsec = UTIME_OMIT;
+            if (mtime > 0) ts[1].tv_sec = mtime;
+            else ts[1].tv_nsec = UTIME_OMIT;
+            ok = !utimensat(AT_FDCWD, path, ts, 0);
 #endif
+        }
+        else ok = tb_true;
+    }
+    else
+    {
+        // create a new file if not exists
+        tb_file_ref_t file = tb_file_init(path, TB_FILE_MODE_RW | TB_FILE_MODE_CREAT);
+        if (file)
+        {
+            if (atime > 0 || mtime > 0)
+            {
+#ifdef TB_CONFIG_POSIX_HAVE_FUTIMENS
+                if (atime > 0) ts[0].tv_sec = atime;
+                else ts[0].tv_nsec = UTIME_OMIT;
+                if (mtime > 0) ts[1].tv_sec = mtime;
+                else ts[1].tv_nsec = UTIME_OMIT;
+                ok = !futimens(tb_file2fd(file), ts);
+#endif
+            }
+            else ok = tb_true;
+            tb_file_exit(file);
+        }
+    }
+    return ok;
+}
+#endif
+
+

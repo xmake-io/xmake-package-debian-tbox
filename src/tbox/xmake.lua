@@ -33,6 +33,11 @@ target("tbox")
     add_headerfiles("../(tbox/utils/impl/*.h)")
     add_headerfiles("$(buildir)/$(plat)/$(arch)/$(mode)/tbox.config.h", {prefixdir = "tbox"})
 
+    -- add frameworks
+    if is_plat("macosx") then
+        add_frameworks("CoreFoundation", "CoreServices", {public = true})
+    end
+
     -- add packages
     for _, name in ipairs({"mbedtls", "polarssl", "openssl", "pcre2", "pcre", "zlib", "mysql", "sqlite3"}) do
         add_packages(name)
@@ -66,7 +71,7 @@ target("tbox")
     add_files("libm/isqrti.c")
     add_files("libm/isqrti64.c")
     add_files("libm/idivi8.c")
-    add_files("platform/*.c|context.c|exception.c", "platform/impl/*.c|charset.c")
+    add_files("platform/*.c|context.c|exception.c", "platform/impl/*.c|charset.c|poller_fwatcher.c")
 
     -- add the source files for the float type
     if has_config("float") then add_files("libm/*.c") end

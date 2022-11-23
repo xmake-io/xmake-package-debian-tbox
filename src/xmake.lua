@@ -267,7 +267,7 @@ function check_interfaces()
         check_module_cfuncs("posix", {"sys/socket.h", "fcntl.h"},        "socket")
         check_module_cfuncs("posix", "dirent.h",                         "opendir")
         check_module_cfuncs("posix", "dlfcn.h",                          "dlopen")
-        check_module_cfuncs("posix", {"sys/stat.h", "fcntl.h"},          "open", "stat64")
+        check_module_cfuncs("posix", {"sys/stat.h", "fcntl.h"},          "open", "stat64", "lstat64")
         check_module_cfuncs("posix", "unistd.h",                         "gethostname")
         check_module_cfuncs("posix", "ifaddrs.h",                        "getifaddrs")
         check_module_cfuncs("posix", "semaphore.h",                      "sem_init")
@@ -290,6 +290,7 @@ function check_interfaces()
         check_module_cfuncs("posix", "unistd.h",                         "pipe", "pipe2")
         check_module_cfuncs("posix", "sys/stat.h",                       "mkfifo")
         check_module_cfuncs("posix", "sys/mman.h",                       "mmap")
+        check_module_cfuncs("posix", "sys/stat.h",                       "futimens", "utimensat")
     end
 
     -- add the interfaces for windows/msvc
@@ -348,6 +349,11 @@ function check_interfaces()
     -- add the interfaces for systemv
     if not is_plat("windows") then
         check_module_cfuncs("systemv", {"sys/sem.h", "sys/ipc.h"}, "semget", "semtimedop")
+    end
+
+    -- add the interfaces for linux
+    if is_plat("linux", "android") then
+        check_module_cfuncs("linux", {"sys/inotify.h"}, "inotify_init")
     end
 
     -- add the interfaces for valgrind

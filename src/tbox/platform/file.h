@@ -51,7 +51,7 @@ __tb_extern_c_enter__
  */
 
 /// the file mode type
-typedef enum __tb_file_mode_t
+typedef enum __tb_file_mode_e
 {
     TB_FILE_MODE_RO         = 1     //!< read only
 ,   TB_FILE_MODE_WO         = 2     //!< write only
@@ -62,19 +62,27 @@ typedef enum __tb_file_mode_t
 ,   TB_FILE_MODE_DIRECT     = 64    //!< direct, no cache, @note data & size must be aligned by TB_FILE_DIRECT_ASIZE
 ,   TB_FILE_MODE_EXEC       = 128   //!< executable, only for tb_file_access, not supported when creating files, not supported on windows
 
-}tb_file_mode_t;
+}tb_file_mode_e;
 
-/// the file seek type
-typedef enum __tb_file_seek_flag_t
+/// the file seek flag
+typedef enum __tb_file_seek_flag_e
 {
     TB_FILE_SEEK_BEG        = 0
 ,   TB_FILE_SEEK_CUR        = 1
 ,   TB_FILE_SEEK_END        = 2
 
-}tb_file_seek_flag_t;
+}tb_file_seek_flag_e;
+
+/// the file copy flag
+typedef enum __tb_file_copy_flag_e
+{
+    TB_FILE_COPY_NONE       = 0 //!< default: copy symlink as file
+,   TB_FILE_COPY_LINK       = 1 //!< reserve symlink
+
+}tb_file_copy_flag_e;
 
 /// the file type
-typedef enum __tb_file_type_t
+typedef enum __tb_file_type_e
 {
     TB_FILE_TYPE_NONE       = 0
 ,   TB_FILE_TYPE_DIRECTORY  = 1
@@ -82,13 +90,24 @@ typedef enum __tb_file_type_t
 ,   TB_FILE_TYPE_DOT        = 3
 ,   TB_FILE_TYPE_DOT2       = 4
 
-}tb_file_type_t;
+}tb_file_type_e;
+
+/// the file flag
+typedef enum __tb_file_flag_e
+{
+    TB_FILE_FLAG_NONE       = 0
+,   TB_FILE_FLAG_LINK       = 1 //!< is symlink?
+
+}tb_file_flag_e;
 
 /// the file info type
 typedef struct __tb_file_info_t
 {
     /// the file type
-    tb_size_t               type;
+    tb_size_t               type: 16;
+
+    /// the file flags
+    tb_size_t               flags: 16;
 
     /// the file size
     tb_hize_t               size;
@@ -262,10 +281,11 @@ tb_bool_t               tb_file_info(tb_char_t const* path, tb_file_info_t* info
  *
  * @param path          the file path
  * @param dest          the dest path
+ * @param flags         the copy flags, e.g. TB_FILE_COPY_LINK
  *
  * @return              tb_true or tb_false
  */
-tb_bool_t               tb_file_copy(tb_char_t const* path, tb_char_t const* dest);
+tb_bool_t               tb_file_copy(tb_char_t const* path, tb_char_t const* dest, tb_size_t flags);
 
 /*! create the file
  *
@@ -309,6 +329,16 @@ tb_bool_t               tb_file_link(tb_char_t const* path, tb_char_t const* des
  * @return              tb_true or tb_false
  */
 tb_bool_t               tb_file_access(tb_char_t const* path, tb_size_t mode);
+
+/*! update the file time, it will create a new if file not found
+ *
+ * @param path          the file path
+ * @param atime         the last access time, it will not modify this time if it's zero
+ * @param mtime         the last modify time, it will not modify this time if it's zero
+ *
+ * @return              tb_true or tb_false
+ */
+tb_bool_t               tb_file_touch(tb_char_t const* path, tb_time_t atime, tb_time_t mtime);
 
 /* //////////////////////////////////////////////////////////////////////////////////////
  * extern

@@ -2,6 +2,21 @@
 
 ## master (unreleased)
 
+## v1.7.1
+
+### New features
+
+* [#190](https://github.com/tboox/tbox/pull/190): Add fs watcher
+* Add `tb_file_touch` api
+
+### Changes
+
+* Support wasm
+* Support arm64 for windows
+* Improve tb_file_info to detect symlink
+* Improve tb_file_copy to support symlink
+* Improve tb_directory_copy to support symlink
+
 ## v1.6.9
 
 ### Changes
@@ -244,6 +259,21 @@
 # 更新日志
 
 ## master (开发中)
+
+## v1.7.1
+
+### 新特性
+
+* [#190](https://github.com/tboox/tbox/pull/190): 添加文件系统状态监视器
+* 添加 `tb_file_touch` 接口
+
+### 改进
+
+* 支持 wasm
+* 支持 arm64 windows
+* 改进 tb_file_info，支持判断符号链接
+* 改进 tb_file_copy 支持符号链接
+* 改进 tb_directory_copy 支持符号链接
 
 ## v1.6.9
 

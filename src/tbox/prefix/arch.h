@@ -74,9 +74,11 @@
 #   else
 #       define TB_ARCH_STRING               "x64"
 #   endif
-#elif defined(__arm__) || defined(__arm64) || defined(__arm64__) || (defined(__aarch64__) && __aarch64__)
+#elif defined(__arm__) || defined(__arm64) || \
+    defined(__arm64__) || (defined(__aarch64__) && __aarch64__) || \
+    defined(_M_ARM64) || defined(_M_ARM)
 #   define TB_ARCH_ARM
-#   if defined(__ARM64_ARCH_8__)
+#   if defined(__ARM64_ARCH_8__) || defined(_M_ARM64)
 #       define TB_ARCH_ARM64
 #       define TB_ARCH_ARM_VERSION          (8)
 #       define TB_ARCH_ARM_v8
@@ -244,6 +246,15 @@
 #       define TB_ARCH_STRING               "arm"
 #   else
 #       error unknown arch for tiny c, please define target like -DTCC_TARGET_I386
+#   endif
+#elif defined(__asmjs__) || defined(__asmjs)
+#   define TB_ARCH_WASM
+#   ifdef __ILP32__
+#       define TB_ARCH_WASM32
+#       define TB_ARCH_STRING                   "wasm32"
+#   else
+#       define TB_ARCH_WASM64
+#       define TB_ARCH_STRING                   "wasm64"
 #   endif
 #else
 #   error unknown arch

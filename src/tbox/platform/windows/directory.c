@@ -80,7 +80,7 @@ static tb_long_t tb_directory_walk_copy(tb_char_t const* path, tb_file_info_t co
     switch (info->type)
     {
     case TB_FILE_TYPE_FILE:
-        if (!tb_file_copy(path, dpath)) tuple[2].b = tb_false;
+        if (!tb_file_copy(path, dpath, TB_FILE_COPY_NONE)) tuple[2].b = tb_false;
         break;
     case TB_FILE_TYPE_DIRECTORY:
         if (!tb_directory_create(dpath)) tuple[2].b = tb_false;
@@ -305,7 +305,7 @@ tb_void_t tb_directory_walk(tb_char_t const* path, tb_long_t recursion, tb_bool_
             tb_directory_walk_impl(full_w, recursion, prefix, func, priv);
     }
 }
-tb_bool_t tb_directory_copy(tb_char_t const* path, tb_char_t const* dest)
+tb_bool_t tb_directory_copy(tb_char_t const* path, tb_char_t const* dest, tb_size_t flags)
 {
     // the absolute path
     tb_char_t full0[TB_PATH_MAXN];
