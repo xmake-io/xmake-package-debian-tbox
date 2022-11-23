@@ -3,6 +3,7 @@ as loop breaker of xmake.
 
 Build without xmake:
 
-1. Run `xmake f --exception=y --small=n --menu` and press save
-2. Copy tbox.config.h from build/linux/x86_64/release
-3. Run `xmake project -k cmake` and manually update debian/CMakeLists.txt
+0. Remember to install `libncurses-dev`
+1. Run `xmake f --exception=y --small=n --menu`, unselect all packages and press save
+2. `cp build/linux/x86_64/release/tbox.config.h debian/`
+3. Run `xmake project -k cmake` and manually update `debian/CMakeLists.txt`

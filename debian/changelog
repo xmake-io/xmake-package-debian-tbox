@@ -1,3 +1,9 @@
+tbox (1.7.1-1) unstable; urgency=medium
+
+  * New upstream release
+
+ -- Yangfl <mmyangfl@gmail.com>  Wed, 23 Nov 2022 16:48:46 +0800
+
 tbox (1.6.9-1) unstable; urgency=medium
 
   * New upstream release

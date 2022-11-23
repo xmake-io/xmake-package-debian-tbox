@@ -4,7 +4,7 @@ Upstream-Contact: ruki <waruqi@gmail.com>
 Source: https://github.com/tboox/tbox
 
 Files: *
-Copyright: 2009-2021 ruki <waruqi@gmail.com>
+Copyright: 2009-2022 ruki <waruqi@gmail.com>
 License: Apache-2
 
 Files: src/tbox/hash/adler32.c
@@ -34,7 +34,7 @@ Copyright: 2009 Oliver Kowalke
 License: Boost-1.0
 
 Files: debian/*
-Copyright: 2021 Yangfl <mmyangfl@gmail.com>
+Copyright: 2021-2022 Yangfl <mmyangfl@gmail.com>
 License: Apache-2
 
 License: Apache-2
