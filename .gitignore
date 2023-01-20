@@ -34,3 +34,5 @@ Doxyfile
 .vscode
 .idea
 CMakeLists.txt
+Makefile
+makefile

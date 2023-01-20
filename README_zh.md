@@ -6,16 +6,16 @@
 
   <div>
     <a href="https://github.com/tboox/tbox/actions?query=workflow%3AWindows">
-      <img src="https://img.shields.io/github/workflow/status/tboox/tbox/Windows/dev.svg?style=flat-square&logo=windows" alt="github-ci" />
+      <img src="https://img.shields.io/github/actions/workflow/status/tboox/tbox/windows.yml?branch=dev&style=flat-square&logo=windows" alt="github-ci" />
     </a>
     <a href="https://github.com/tboox/tbox/actions?query=workflow%3ALinux">
-      <img src="https://img.shields.io/github/workflow/status/tboox/tbox/Linux/dev.svg?style=flat-square&logo=linux" alt="github-ci" />
+      <img src="https://img.shields.io/github/actions/workflow/status/tboox/tbox/linux.yml?branch=dev&style=flat-square&logo=linux" alt="github-ci" />
     </a>
     <a href="https://github.com/tboox/tbox/actions?query=workflow%3AmacOS">
-      <img src="https://img.shields.io/github/workflow/status/tboox/tbox/macOS/dev.svg?style=flat-square&logo=apple" alt="github-ci" />
+      <img src="https://img.shields.io/github/actions/workflow/status/tboox/tbox/macos.yml?branch=dev&style=flat-square&logo=apple" alt="github-ci" />
     </a>
     <a href="https://github.com/tboox/tbox/actions?query=workflow%3AAndroid">
-      <img src="https://img.shields.io/github/workflow/status/tboox/tbox/Android/dev.svg?style=flat-square&logo=android" alt="github-ci" />
+      <img src="https://img.shields.io/github/actions/workflow/status/tboox/tbox/android.yml?branch=dev&style=flat-square&logo=android" alt="github-ci" />
     </a>
     <a href="https://github.com/tboox/tbox/releases">
       <img src="https://img.shields.io/github/release/tboox/tbox.svg?style=flat-square" alt="Github All Releases" />
@@ -204,7 +204,7 @@ TBOX是一个用c语言实现的跨平台开发库。
 * [itrace](https://github.com/tboox/itrace)
 * [更多项目](https://github.com/tboox/tbox/wiki/%E4%BD%BF%E7%94%A8tbox%E7%9A%84%E5%BC%80%E6%BA%90%E5%BA%93)
 
-## 编译
+## 使用 Xmake 编译
 
 请先安装: [xmake](https://github.com/xmake-io/xmake)
 
@@ -234,63 +234,31 @@ $ xmake f -p linux --sdk=/home/sdk #--bin=/home/sdk/bin
 $ xmake
 ```
 
+## 使用 xmake.sh 编译
+
+```console
+$ ./configure
+$ make
+```
+
 ## 例子
 
 ```c
 #include "tbox/tbox.h"
 
-int main(int argc, char** argv)
-{
-    // init tbox
+int main(int argc, char** argv) {
     if (!tb_init(tb_null, tb_null)) return 0;
 
-    // trace
-    tb_trace_i("hello tbox");
-
-    // init vector
     tb_vector_ref_t vector = tb_vector_init(0, tb_element_str(tb_true));
-    if (vector)
-    {
-        // insert item
+    if (vector) {
         tb_vector_insert_tail(vector, "hello");
         tb_vector_insert_tail(vector, "tbox");
 
-        // dump all items
-        tb_for_all (tb_char_t const*, cstr, vector)
-        {
-            // trace
+        tb_for_all (tb_char_t const*, cstr, vector) {
             tb_trace_i("%s", cstr);
         }
-
-        // exit vector
         tb_vector_exit(vector);
     }
-
-    // init stream
-    tb_stream_ref_t stream = tb_stream_init_from_url("http://www.xxx.com/file.txt");
-    if (stream)
-    {
-        // open stream
-        if (tb_stream_open(stream))
-        {
-            // read line
-            tb_long_t size = 0;
-            tb_char_t line[TB_STREAM_BLOCK_MAXN];
-            while ((size = tb_stream_bread_line(stream, line, sizeof(line))) >= 0)
-            {
-                // trace
-                tb_trace_i("line: %s", line);
-            }
-        }
-
-        // exit stream
-        tb_stream_exit(stream);
-    }
-
-    // wait
-    tb_getchar();
-
-    // exit tbox
     tb_exit();
     return 0;
 }
