@@ -1,3 +1,10 @@
+tbox (1.7.3-1) unstable; urgency=medium
+
+  * New upstream release
+  * Bump Standards-Version to 4.6.2
+
+ -- Yangfl <mmyangfl@gmail.com>  Fri, 20 Jan 2023 18:19:44 +0800
+
 tbox (1.7.1-1) unstable; urgency=medium
 
   * New upstream release
