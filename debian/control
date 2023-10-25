@@ -8,8 +8,8 @@ Build-Depends:
 Rules-Requires-Root: no
 Standards-Version: 4.6.2
 Homepage: https://github.com/tboox/tbox
-Vcs-Git: https://salsa.debian.org/yangfl-guest/tbox.git
-Vcs-Browser: https://salsa.debian.org/yangfl-guest/tbox
+Vcs-Git: https://salsa.debian.org/xmake-team/tbox.git
+Vcs-Browser: https://salsa.debian.org/xmake-team/tbox
 
 Package: libtbox-dev
 Section: libdevel
