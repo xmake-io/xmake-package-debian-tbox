@@ -31,9 +31,14 @@
 #include "../spinlock.h"
 #include "../../container/container.h"
 #include "../../algorithm/algorithm.h"
+#include "../../libc/libc.h"
 #include <fcntl.h>
 #include <errno.h>
 #include <unistd.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <dirent.h>
+#include <string.h>
 #include <sys/wait.h>
 #ifdef TB_CONFIG_POSIX_HAVE_POSIX_SPAWNP
 #   include <spawn.h>
@@ -46,6 +51,10 @@
         && !defined(TB_CONFIG_MICRO_ENABLE)
 #   include "../../coroutine/coroutine.h"
 #   include "../../coroutine/impl/impl.h"
+#endif
+#ifdef TB_CONFIG_OS_MACOSX
+#   include <sys/proc_info.h>
+#   include <libproc.h>
 #endif
 
 /* //////////////////////////////////////////////////////////////////////////////////////
@@ -107,10 +116,8 @@ __tb_extern_c_leave__
  */
 static tb_int_t tb_process_file_flags(tb_size_t mode)
 {
-    // no mode? uses the default mode
     if (!mode) mode = TB_FILE_MODE_RW | TB_FILE_MODE_CREAT | TB_FILE_MODE_TRUNC;
 
-    // make flags
     tb_size_t flags = 0;
     if (mode & TB_FILE_MODE_RO)         flags |= O_RDONLY;
     else if (mode & TB_FILE_MODE_WO)    flags |= O_WRONLY;
@@ -118,8 +125,6 @@ static tb_int_t tb_process_file_flags(tb_size_t mode)
     if (mode & TB_FILE_MODE_CREAT)      flags |= O_CREAT;
     if (mode & TB_FILE_MODE_APPEND)     flags |= O_APPEND;
     if (mode & TB_FILE_MODE_TRUNC)      flags |= O_TRUNC;
-
-    // ok?
     return flags;
 }
 static tb_int_t tb_process_file_modes(tb_size_t mode)
@@ -134,6 +139,107 @@ static tb_int_t tb_process_file_modes(tb_size_t mode)
     // ok?
     return modes;
 }
+#if defined(TB_CONFIG_OS_MACOSX)
+static tb_bool_t tb_process_kill_allchilds(pid_t parent_pid)
+{
+    tb_assert_and_check_return_val(parent_pid > 0, tb_false);
+
+    tb_int_t procs_count = proc_listpids(PROC_PPID_ONLY, parent_pid, tb_null, 0);
+    tb_assert_and_check_return_val(procs_count >= 0, tb_false);
+
+    if (procs_count > 0)
+    {
+        pid_t* pids = tb_nalloc0_type(procs_count, pid_t);
+        tb_assert_and_check_return_val(pids, tb_false);
+
+        proc_listpids(PROC_PPID_ONLY, parent_pid, pids, procs_count * sizeof(pid_t));
+        for (tb_int_t i = 0; i < procs_count; ++i)
+        {
+            tb_check_continue(pids[i]);
+
+#ifdef __tb_debug__
+            tb_char_t path[PROC_PIDPATHINFO_MAXSIZE] = {0};
+            proc_pidpath(pids[i], path, sizeof(path));
+            if (tb_strlen(path) > 0)
+            {
+                tb_trace_d("kill pid: %d, path: %s", pids[i], path);
+            }
+#endif
+
+            // kill subprocess
+            kill(pids[i], SIGKILL);
+        }
+
+        tb_free(pids);
+    }
+    return tb_true;
+}
+#elif defined(TB_CONFIG_OS_LINUX)
+static tb_bool_t tb_process_kill_allchilds(pid_t parent_pid)
+{
+    DIR* procdir = opendir("/proc");
+    tb_assert_and_check_return_val(procdir, tb_false);
+
+    tb_int_t pid;
+    tb_char_t path[256];
+    struct dirent* entry;
+    while ((entry = readdir(procdir)))
+    {
+        if (entry->d_type == DT_DIR && (pid = tb_atoi(entry->d_name)) && pid > 0)
+        {
+            tb_int_t ret = tb_snprintf(path, sizeof(path), "/proc/%d/status", pid);
+            if (ret > 0 && ret < sizeof(path))
+                path[ret] = '\0';
+
+            FILE* fp = fopen(path, "r");
+            if (fp)
+            {
+                tb_char_t line[128];
+#ifdef __tb_debug__
+                tb_char_t name[128] = {0};
+#endif
+                while (fgets(line, sizeof(line), fp))
+                {
+                    if (tb_strncmp(line, "PPid:", 5) == 0)
+                    {
+                        tb_char_t const* p = line + 5;
+                        while (*p && tb_isspace(*p)) p++;
+                        tb_int_t ppid = tb_atoi(p);
+                        if (ppid == parent_pid)
+                        {
+                            tb_trace_d("kill pid: %d, ppid: %d, name: %s", pid, ppid, name);
+                            tb_process_kill_allchilds(pid);
+                            kill(pid, SIGKILL);
+                        }
+                    }
+#ifdef __tb_debug__
+                    else if (tb_strncmp(line, "Name:", 5) == 0)
+                    {
+                        tb_char_t const* p = line + 5;
+                        while (*p && tb_isspace(*p)) p++;
+                        tb_strlcpy(name, p, sizeof(name));
+                    }
+#endif
+                }
+                fclose(fp);
+            }
+        }
+    }
+
+    closedir(procdir);
+    return tb_true;
+}
+#else
+static tb_bool_t tb_process_kill_allchilds(pid_t pid)
+{
+    return tb_false;
+}
+#endif
+
+/* //////////////////////////////////////////////////////////////////////////////////////
+ * implementation
+ */
+
 tb_int_t tb_process_pid(tb_process_ref_t self)
 {
     // check
@@ -157,6 +263,7 @@ tb_void_t tb_process_group_exit()
         // @note we do not destroy these leaked processes now.
         tb_for_all_if (tb_process_t*, process, g_processes_group, process)
         {
+            tb_process_kill_allchilds(process->pid);
             tb_process_kill((tb_process_ref_t)process);
         }
 
