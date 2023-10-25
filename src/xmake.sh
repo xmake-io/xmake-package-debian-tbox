@@ -1,7 +1,7 @@
 #!/bin/sh
 
 set_project "tbox"
-set_version "1.7.3" "%Y%m%d"
+set_version "1.7.4" "%Y%m%d" "1"
 
 # set warning all as error
 set_warnings "all" "error"
@@ -20,7 +20,9 @@ if is_mode "debug"; then
     set_optimizes "none"
 else
     set_strip "all"
-    set_symbols "hidden"
+    if ! is_kind "shared"; then
+        set_symbols "hidden"
+    fi
     set_optimizes "smallest"
 fi
 
@@ -33,6 +35,8 @@ fi
 
 if is_plat "mingw" "msys" "cygwin"; then
     add_syslinks "ws2_32" "pthread" "m"
+elif is_plat "haiku"; then
+    add_syslinks "pthread" "network" "m" "c"
 else
     add_syslinks "pthread" "dl" "m" "c"
 fi

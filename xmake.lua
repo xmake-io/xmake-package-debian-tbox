@@ -5,7 +5,7 @@ set_project("tbox")
 set_xmakever("2.6.1")
 
 -- set project version
-set_version("1.7.3", {build = "%Y%m%d"})
+set_version("1.7.4", {build = "%Y%m%d", soname = true})
 
 -- set warning all as error
 set_warnings("all", "error")
@@ -21,9 +21,13 @@ set_configvar("_REENTRANT", 1)
 -- disable some compiler errors
 add_cxflags("-Wno-error=deprecated-declarations", "-fno-strict-aliasing", "-Wno-error=expansion-to-defined")
 add_mxflags("-Wno-error=deprecated-declarations", "-fno-strict-aliasing", "-Wno-error=expansion-to-defined")
+if has_config("coroutine") then
+    -- https://github.com/tboox/tbox/issues/218
+    add_cxflags("gcc::-Wno-error=dangling-pointer")
+end
 
 -- add build modes
-add_rules("mode.release", "mode.debug", "mode.profile", "mode.coverage")-- TODO, "mode.valgrind", "mode.asan", "mode.tsan", "mode.ubsan") -- for xmake v2.3.3
+add_rules("mode.release", "mode.debug", "mode.profile", "mode.coverage", "mode.valgrind", "mode.asan", "mode.tsan", "mode.ubsan")
 if is_mode("debug") then
     add_defines("__tb_debug__")
 end
@@ -65,6 +69,8 @@ elseif is_plat("android") then
     add_syslinks("m", "c")
 elseif is_plat("mingw", "msys", "cygwin") then
     add_syslinks("ws2_32", "pthread", "m")
+elseif is_plat("haiku") then
+    add_syslinks("pthread", "network", "m", "c")
 else
     add_syslinks("pthread", "dl", "m", "c")
 end
