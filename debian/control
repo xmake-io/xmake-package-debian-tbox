@@ -2,6 +2,7 @@ Source: tbox
 Section: libs
 Priority: optional
 Maintainer: Yangfl <mmyangfl@gmail.com>
+Uploaders: Lance Lin <lq27267@gmail.com>
 Build-Depends:
  debhelper-compat (= 13),
 Rules-Requires-Root: no
